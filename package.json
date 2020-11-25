@@ -1,0 +1,43 @@
+{
+  "name": "endanger",
+  "version": "0.0.0",
+  "description": "Build Dangerfiles with ease.",
+  "main": "index.js",
+  "scripts": {
+    "build": "rm -rf dist && tsc && prettier --ignore-path='.no' 'dist/**' --write",
+    "danger": "danger local -d ./dangerfile.ts -s -b master",
+    "prepublishOnly": "npm run -s build"
+  },
+  "keywords": [],
+  "author": "Jamie Kyle <me@thejameskyle.com>",
+  "license": "MIT",
+  "dependencies": {
+    "intl-messageformat": "^9.3.19"
+  },
+  "peerDependencies": {
+    "danger": "^10.5.3"
+  },
+  "devDependencies": {
+    "@types/memoizee": "^0.4.5",
+    "@types/micromatch": "^4.0.1",
+    "danger": "^10.5.3",
+    "husky": "^4.3.0",
+    "lint-staged": "^10.5.2",
+    "memoizee": "^0.4.14",
+    "micromatch": "^4.0.2",
+    "prettier": "^2.2.0",
+    "strip-indent": "^3.0.0",
+    "typescript": "^4.0.5"
+  },
+  "lint-staged": {
+    "*": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  }
+}

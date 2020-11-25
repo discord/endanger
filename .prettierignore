@@ -1,0 +1,6 @@
+node_modules
+dist
+LICENSE
+.*ignore
+.*rc
+tsconfig.json

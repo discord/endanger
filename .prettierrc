@@ -1,0 +1,19 @@
+{
+	"useTabs": true,
+	"semi": false,
+	"trailingComma": "all",
+	"overrides": [
+		{
+			"files": ["*.{md,json}"],
+			"options": {
+				"useTabs": false
+			}
+		},
+		{
+			"files": ["*.md"],
+			"options": {
+				"proseWrap": "always"
+			}
+		}
+	]
+}
