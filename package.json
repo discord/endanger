@@ -1,6 +1,6 @@
 {
   "name": "endanger",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Build Dangerfiles with ease.",
   "main": "index.js",
   "scripts": {
