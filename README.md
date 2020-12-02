@@ -178,7 +178,7 @@ context.message("myMessage", file, line) // Note: `file` and `line` are optional
 ### `Bytes`
 
 This represents some readable data whether it be a [`File`](#file),
-[`GitFile`](#gitfile), or [`GitDiff`](#gitdiff).
+[`FileState`](#FileState), or [`Diff`](#diff).
 
 ```ts
 // Read the contents of this file/diff/etc.
@@ -187,12 +187,17 @@ await bytes.contents() // "line1/nline2"
 // Does this file/diff/etc contain a string or match a regex?
 await bytes.contains("string") // true/false
 await bytes.contains(/regex/) // true/false
-
-// Read this file/diff/etc line by line
-await bytes.lines() // ["line1", "line2"]
 ```
 
-### `File`
+### `Line`
+
+> (extends [`Bytes`](#bytes))
+
+```ts
+line.lineNumber // 42
+```
+
+### `FileState`
 
 > (extends [`Bytes`](#bytes))
 
@@ -220,21 +225,22 @@ await file.json() // { ... }
 
 // Parse the file as YAML
 await file.yaml() // { ... }
+
+// Read this file line by line
+await file.lines() // [Line, Line, Line]
 ```
 
-### `GitDiff`
-
-> (extends [`Bytes`](#bytes))
+### `Diff`
 
 ```ts
 // only the added lines
-diff.added() // Bytes { "added line" }
+await diff.added() // [Line, Line, Line]
 
 // only the removed lines
-diff.removed() // Bytes { "removed line" }
+await diff.removed() // [Line, Line, Line]
 
-// Chunks of the changed lines
-await diff.chunks() // [Bytes, Bytes]
+// all of the changed lines
+await diff.changed() // [Line, Line, Line, Line, Line, Line]
 
 // Returns a JSONDiff of the file (assuming the file is JSON)
 await diff.jsonDiff() // JSONDiff { ... }
@@ -253,9 +259,9 @@ await diff.changedBy({ removed: 0.2 }) // true/false
 await diff.changedBy({ added: 0.3, removed: 0.2 }) // true/false
 ```
 
-### `GitFile`
+### `File`
 
-> (extends [`File`](#file))
+> (extends [`FileState`](#filestate))
 
 ```ts
 // Has the file been created?
@@ -280,38 +286,38 @@ await file.moved() // true/false
 file.before() // File | null
 
 // Get information about the diff of the file
-file.diff() //  GitDiff | null
+file.diff() // Diff | null
 ```
 
-### `GitFiles`
+### `Files`
 
 > (extends [`Bytes`](#bytes))
 
 ```ts
 // Get all of the created files.
-files.created // [GitFile, GitFile, ...]
+files.created // [File, File, ...]
 
 // Get all of the deleted files.
-files.deleted // [GitFile, GitFile, ...]
+files.deleted // [File, File, ...]
 
 // Get all of the modified files.
-files.modified // [GitFile, GitFile, ...]
+files.modified // [File, File, ...]
 
 // Get all of the edited files.
-files.edited // [GitFile, GitFile, ...]
+files.edited // [File, File, ...]
 
 // Get all of the touched files.
-files.touched // [GitFile, GitFile, ...]
+files.touched // [File, File, ...]
 
 // Get all of the untouched files.
-files.untouched // [GitFile, GitFile, ...]
+files.untouched // [File, File, ...]
 
 // Get all files regardless of if they have been touched or not.
-files.all // [GitFile, GitFile, ...]
+files.all // [File, File, ...]
 
 // Get a specific file.
-files.get("path/to/file.ext") // GitFile | null
+files.get("path/to/file.ext") // File | null
 
 // Filter files by a set of glob patterns
-files.matches("path/to/**", "{glob,patterns}") // GitFiles
+files.matches("path/to/**", "{glob,patterns}") // Files
 ```

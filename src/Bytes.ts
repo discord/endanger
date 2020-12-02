@@ -1,4 +1,5 @@
 import type { Reader } from "./types"
+import contains from "./utils/contains"
 
 export default class Bytes {
 	private _reader: Reader
@@ -20,18 +21,6 @@ export default class Bytes {
 	 */
 	async contains(matcher: string | RegExp): Promise<boolean> {
 		let contents = await this.contents()
-		if (typeof matcher === "string") {
-			return contents.includes(matcher)
-		} else {
-			return matcher.test(contents)
-		}
-	}
-
-	/**
-	 * Read this file/diff/etc line by line
-	 */
-	async lines(): Promise<string[]> {
-		let contents = await this.contents()
-		return contents.split("\n")
+		return contains(contents, matcher)
 	}
 }

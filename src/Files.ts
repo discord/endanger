@@ -1,11 +1,10 @@
 import type { KeyedPaths, GitMatchResult } from "danger"
-import GitFile from "./GitFile"
+import File from "./File"
 import matches from "./utils/matches"
 import unique from "./utils/unique"
-import execStdout from "./utils/execStdout"
 import remove from "./utils/remove"
 
-export default class GitFiles {
+export default class Files {
 	private _allFiles: string[]
 	private _keyedPaths: KeyedPaths<GitMatchResult>
 
@@ -17,78 +16,78 @@ export default class GitFiles {
 	/**
 	 * Get all of the created files.
 	 */
-	get created(): GitFile[] {
+	get created(): File[] {
 		return this._keyedPaths.created.map((filePath) => {
-			return new GitFile(filePath)
+			return new File(filePath)
 		})
 	}
 
 	/**
 	 * Get all of the deleted files.
 	 */
-	get deleted(): GitFile[] {
+	get deleted(): File[] {
 		return this._keyedPaths.deleted.map((filePath) => {
-			return new GitFile(filePath)
+			return new File(filePath)
 		})
 	}
 
 	/**
 	 * Get all of the modified files.
 	 */
-	get modified(): GitFile[] {
+	get modified(): File[] {
 		return this._keyedPaths.modified.map((filePath) => {
-			return new GitFile(filePath)
+			return new File(filePath)
 		})
 	}
 
 	/**
 	 * Get all of the edited files.
 	 */
-	get edited(): GitFile[] {
+	get edited(): File[] {
 		return this._keyedPaths.edited.map((filePath) => {
-			return new GitFile(filePath)
+			return new File(filePath)
 		})
 	}
 
 	/**
 	 * Get all of the touched files.
 	 */
-	get touched(): GitFile[] {
+	get touched(): File[] {
 		return unique([
 			...this._keyedPaths.edited,
 			...this._keyedPaths.deleted,
 		]).map((filePath) => {
-			return new GitFile(filePath)
+			return new File(filePath)
 		})
 	}
 
 	/**
 	 * Get all of the untouched files.
 	 */
-	get untouched(): GitFile[] {
+	get untouched(): File[] {
 		return remove(
 			this._allFiles,
 			unique([...this._keyedPaths.edited, ...this._keyedPaths.deleted]),
 		).map((filePath) => {
-			return new GitFile(filePath)
+			return new File(filePath)
 		})
 	}
 
 	/**
 	 * Get all files regardless of if they have been touched or not.
 	 */
-	get all(): GitFile[] {
+	get all(): File[] {
 		return this._allFiles.map((filePath) => {
-			return new GitFile(filePath)
+			return new File(filePath)
 		})
 	}
 
 	/**
 	 * Get a specific file.
 	 */
-	get(relativePath: string): GitFile | null {
+	get(relativePath: string): File | null {
 		if (danger.git.fileMatch(relativePath)) {
-			return new GitFile(relativePath)
+			return new File(relativePath)
 		} else {
 			return null
 		}
@@ -97,8 +96,8 @@ export default class GitFiles {
 	/**
 	 * Filter files by a set of glob patterns
 	 */
-	matches(...patterns: string[]): GitFiles {
-		return new GitFiles(matches(this._allFiles, patterns), {
+	matches(...patterns: string[]): Files {
+		return new Files(matches(this._allFiles, patterns), {
 			created: matches(this._keyedPaths.created, patterns),
 			deleted: matches(this._keyedPaths.deleted, patterns),
 			modified: matches(this._keyedPaths.modified, patterns),

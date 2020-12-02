@@ -1,5 +1,10 @@
 import type { Messages, Reporter } from "./types"
-import type GitFile from "./GitFile"
+import type File from "./File"
+import Line from "./Line"
+
+function getLineNumber(line: Line | number | undefined): number | undefined {
+	return line instanceof Line ? line.lineNumber : line
+}
 
 export default class Context<M extends Messages> {
 	private _reporter: Reporter<M>
@@ -8,15 +13,15 @@ export default class Context<M extends Messages> {
 		this._reporter = reporter
 	}
 
-	warn(messageId: keyof M, file?: GitFile, line?: number): void {
-		this._reporter("warn", messageId, file, line)
+	warn(messageId: keyof M, file?: File, line?: number | Line): void {
+		this._reporter("warn", messageId, file, getLineNumber(line))
 	}
 
-	fail(messageId: keyof M, file?: GitFile, line?: number): void {
-		this._reporter("fail", messageId, file, line)
+	fail(messageId: keyof M, file?: File, line?: number | Line): void {
+		this._reporter("fail", messageId, file, getLineNumber(line))
 	}
 
-	message(messageId: string, file?: GitFile, line?: number): void {
-		this._reporter("message", messageId, file, line)
+	message(messageId: string, file?: File, line?: number | Line): void {
+		this._reporter("message", messageId, file, getLineNumber(line))
 	}
 }

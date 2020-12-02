@@ -5,10 +5,61 @@ import type {
 	message as Message,
 	markdown as Markdown,
 } from "danger"
-import type GitFile from "./GitFile"
-import type GitFiles from "./GitFiles"
+import type File from "./File"
+import type Files from "./Files"
 import type Context from "./Context"
 import type Rule from "./Rule"
+
+export interface StructuredDiffBaseChange {
+	type: "add" | "del" | "normal"
+	add: true | undefined
+	del: true | undefined
+	normal: true | undefined
+	content: string
+}
+
+export interface StructuredDiffAddChange extends StructuredDiffBaseChange {
+	type: "add"
+	add: true
+	del: undefined
+	normal: undefined
+	ln: number
+}
+
+export interface StructuredDiffDelChange extends StructuredDiffBaseChange {
+	type: "del"
+	add: undefined
+	del: true
+	normal: undefined
+	ln: number
+}
+
+export interface StructuredDiffNormalChange extends StructuredDiffBaseChange {
+	type: "normal"
+	add: undefined
+	del: undefined
+	normal: true
+	ln1: number
+	ln2: number
+}
+
+export type StructuredDiffChange =
+	| StructuredDiffAddChange
+	| StructuredDiffDelChange
+	| StructuredDiffNormalChange
+
+export interface StructuredDiffChunk {
+	content: string
+	changes: StructuredDiffChange[]
+	oldStart: number
+	oldLines: number
+	newStart: number
+	newLines: number
+}
+
+export interface StructuredDiff {
+	chunks: StructuredDiffChunk[]
+}
 
 export interface DiffThresholds {
 	changed?: number
@@ -27,7 +78,7 @@ export interface GitDiffStats {
 export type ReportKind = "warn" | "fail" | "message"
 
 export interface ReportLocation {
-	file?: GitFile
+	file?: File
 	line?: number
 }
 
@@ -41,7 +92,7 @@ export interface Report {
 export type Reporter<M extends Messages> = (
 	kind: ReportKind,
 	messageId: keyof M,
-	file?: GitFile,
+	file?: File,
 	line?: number,
 ) => void
 
@@ -57,7 +108,7 @@ export interface RuleOptions<M extends Messages> {
 	description: string
 	helpLink?: string
 	messages: M
-	run(files: GitFiles, context: Context<M>): Promise<void> | void
+	run(files: Files, context: Context<M>): Promise<void> | void
 }
 
 declare global {

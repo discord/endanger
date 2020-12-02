@@ -1,5 +1,5 @@
 import Rule from "./Rule"
-import GitFiles from "./GitFiles"
+import Files from "./Files"
 import Context from "./Context"
 import ArrayMap from "./utils/ArrayMap"
 import type { Report, Messages } from "./types"
@@ -30,7 +30,7 @@ export default async function run(...rules: Rule<any>[]) {
 		}
 
 		let matchingFiles = matches(allFiles, rule.files)
-		let files = new GitFiles(matchingFiles, filesState.getKeyedPaths())
+		let files = new Files(matchingFiles, filesState.getKeyedPaths())
 		let context = new Context<Messages>((kind, messageId: any, file, line) => {
 			reportsMap.append(messageId, {
 				rule,

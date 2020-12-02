@@ -1,6 +1,6 @@
-import { Rule, GitFile, DiffThresholds } from "../src"
+import { Rule, File, DiffThresholds } from "../src"
 
-function hasMatchingStory(component: GitFile, storybooks: GitFile[]): boolean {
+function hasMatchingStory(component: File, storybooks: File[]): boolean {
 	let componentName = component.basename.split(".")[0].toLowerCase()
 
 	for (let storybook of storybooks) {
@@ -13,7 +13,7 @@ function hasMatchingStory(component: GitFile, storybooks: GitFile[]): boolean {
 	return false
 }
 
-async function isSignificantChange(component: GitFile): Promise<boolean> {
+async function isSignificantChange(component: File): Promise<boolean> {
 	let diff = component.diff()
 
 	if (!diff) {

@@ -1,69 +1,87 @@
-import path from "path"
-import matches from "./utils/matches"
-import Bytes from "./Bytes"
-import type { Reader } from "./types"
+import type { GitMatchResult } from "danger"
+import FileState from "./FileState"
+import Diff from "./Diff"
+import execStdout from "./utils/execStdout"
 
-export default class File extends Bytes {
-	private _filePath: string
+function getGitMatchResult(filePath: string): GitMatchResult {
+	return danger.git.fileMatch(filePath)
+}
 
-	constructor(relativeFilePath: string, reader: Reader) {
-		super(reader)
-		this._filePath = relativeFilePath
+export default class File extends FileState {
+	constructor(relativeFilePath: string) {
+		super(
+			relativeFilePath,
+			(): Promise<string> => {
+				return execStdout(`git show ${danger.git.head}:${relativeFilePath}`)
+			},
+		)
 	}
 
 	/**
-	 * Get the file path (relative to repo root)
+	 * Has the file been created?
 	 */
-	get path(): string {
-		return this._filePath
+	get created(): boolean {
+		return getGitMatchResult(this.path).created
 	}
 
 	/**
-	 * Get the file basename
+	 * Has the file been deleted?
 	 */
-	get name(): string {
-		return path.basename(this._filePath)
+	get deleted(): boolean {
+		return getGitMatchResult(this.path).deleted
 	}
 
 	/**
-	 * Get the file dirname (relative to repo root)
+	 * Has the file been modified?
 	 */
-	get dirname(): string {
-		return path.dirname(this._filePath)
+	get modified(): boolean {
+		return getGitMatchResult(this.path).modified
 	}
 
 	/**
-	 * Get the file basename
+	 * Has the file been edited (created or modified)?
 	 */
-	get basename(): string {
-		return path.basename(this._filePath, this.extension)
+	get edited(): boolean {
+		return getGitMatchResult(this.path).edited
 	}
 
 	/**
-	 * Get the file extension
+	 * Has the file been touched (created, modified, or deleted)?
 	 */
-	get extension(): string {
-		return path.extname(this._filePath)
+	get touched(): boolean {
+		let gitMatchResult = getGitMatchResult(this.path)
+		return gitMatchResult.edited || gitMatchResult.deleted
 	}
 
 	/**
-	 * Does the file path match a set of glob patterns?
+	 * Has the file been moved from another location?
 	 */
-	matches(...patterns: string[]): boolean {
-		return matches([this._filePath], patterns).length !== 0
-	}
-
-	/**
-	 * Parse the file as JSON
-	 */
-	async json(): Promise<any> {
-		return JSON.parse(await this.contents())
-	}
-
-	/**
-	 * Parse the file as YAML
-	 */
-	yaml() {
+	async moved(): Promise<boolean> {
+		// let diff = await execStdout(`git diff -M ${danger.git.head} ${this.path}`)
 		throw new Error("unimplemented")
+	}
+
+	/**
+	 * Get the state of the file before all the changes made.
+	 */
+	before(): FileState | null {
+		if (this.created) {
+			return null
+		} else {
+			return new FileState(this.path, () => {
+				return execStdout(`git show ${danger.git.base}:${this.path}`)
+			})
+		}
+	}
+
+	/**
+	 * Get information about the diff of the file
+	 */
+	diff(): Diff | null {
+		if (this.created) {
+			return null
+		} else {
+			return new Diff(this.path)
+		}
 	}
 }
