@@ -9,6 +9,9 @@
     "prepublishOnly": "npm run -s build"
   },
   "keywords": [],
+  "files": [
+    "dist"
+  ],
   "author": "Jamie Kyle <me@thejameskyle.com>",
   "license": "MIT",
   "dependencies": {
