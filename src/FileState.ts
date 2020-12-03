@@ -1,4 +1,5 @@
 import path from "path"
+import { parse as parseYaml } from "yaml"
 import matches from "./utils/matches"
 import Bytes from "./Bytes"
 import Line from "./Line"
@@ -64,8 +65,8 @@ export default class FileState extends Bytes {
 	/**
 	 * Parse the file as YAML
 	 */
-	yaml() {
-		throw new Error("unimplemented")
+	async yaml(): Promise<any> {
+		return parseYaml(await this.contents())
 	}
 
 	/**
