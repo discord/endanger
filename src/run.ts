@@ -17,7 +17,8 @@ async function getAllFiles() {
 	let stdout = await execStdout("git", [
 		"ls-tree",
 		"--name-only",
-		`-r ${danger.git.head}`,
+		"-r",
+		danger.git.head,
 	])
 	let files = stdout.split("\n")
 	return files
