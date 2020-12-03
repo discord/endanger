@@ -12,7 +12,10 @@ export default class File extends FileState {
 		super(
 			relativeFilePath,
 			(): Promise<string> => {
-				return execStdout(`git show ${danger.git.head}:${relativeFilePath}`)
+				return execStdout("git", [
+					"show",
+					`${danger.git.head}:${relativeFilePath}`,
+				])
 			},
 		)
 	}
@@ -69,7 +72,7 @@ export default class File extends FileState {
 			return null
 		} else {
 			return new FileState(this.path, () => {
-				return execStdout(`git show ${danger.git.base}:${this.path}`)
+				return execStdout("git", ["show", `${danger.git.base}:${this.path}`])
 			})
 		}
 	}

@@ -1,13 +1,9 @@
-import { exec } from "child_process"
+import execa from "execa"
 
-export default function execStdout(command: string): Promise<string> {
-	return new Promise((resolve, reject) => {
-		exec(command, (error, stdout, stderr) => {
-			if (error) {
-				reject(error)
-			} else {
-				resolve(stdout)
-			}
-		})
-	})
+export default async function execStdout(
+	command: string,
+	args: string[],
+): Promise<string> {
+	let result = await execa(command, args)
+	return result.stdout
 }
