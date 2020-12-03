@@ -2,7 +2,7 @@ import { Rule } from "../src"
 
 export default function preferTypeScript() {
 	return new Rule({
-		files: ["**/*.{js,jsx,ts,tsx}"],
+		files: ["**/*.{js,jsx,ts,tsx}", "**"],
 		messages: {
 			foundNewJSFile: `
 				**Use TypeScript for new code files**
@@ -34,18 +34,18 @@ export default function preferTypeScript() {
 			for (let file of files.touched) {
 				if (file.matches("*.{js,jsx}")) {
 					if (file.created) {
-						context.warn("foundNewJSFile", file)
+						context.warn("foundNewJSFile", { file })
 					} else if (file.modified) {
 						if (await file.contains("// @flow")) {
 							if (!(await file.before()?.contains("// @flow"))) {
-								context.warn("foundNewFlowFile", file, 1)
+								context.warn("foundNewFlowFile", { file, line: 1 })
 							} else {
-								context.warn("foundChangedFlowFile", file)
+								context.warn("foundChangedFlowFile", { file })
 							}
 						} else if (
 							await file.diff()?.changedBy({ added: 0.1, removed: 0.5 })
 						) {
-							context.warn("foundJSFileWithManyChanges", file)
+							context.warn("foundJSFileWithManyChanges", { file })
 						}
 					}
 				}

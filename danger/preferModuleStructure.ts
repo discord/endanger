@@ -2,7 +2,7 @@ import { Rule } from "../src"
 
 export default function preferModuleStructure(options: { projectDir: string }) {
 	return new Rule({
-		files: [`${options.projectDir}/**`, "**"],
+		files: [`${options.projectDir}/**`],
 		messages: {
 			foundLegacyFileWithManyChanges: `
         **Consider moving this file to \`@app/modules\`**
@@ -24,25 +24,16 @@ export default function preferModuleStructure(options: { projectDir: string }) {
       `,
 		},
 		async run(files, context) {
-			for (let file of files.edited) {
-				let diff = file.diff()
-				if (diff) {
-					for (let line of await diff.added()) {
-						console.log(await line.contents())
-					}
-				}
-			}
-
 			let legacyFiles = files.matches(
 				`${options.projectDir}/{actions,stores,components,components_common,components_ios}/**/*`,
 			)
 
 			for (let legacyFile of legacyFiles.edited) {
 				if (legacyFile.created) {
-					context.warn("foundNewLegacyFile", legacyFile)
+					context.warn("foundNewLegacyFile", { file: legacyFile })
 				} else if (legacyFile.modified) {
 					if (await legacyFile.diff()?.changedBy({ changed: 0.6 })) {
-						context.warn("foundLegacyFileWithManyChanges", legacyFile)
+						context.warn("foundLegacyFileWithManyChanges", { file: legacyFile })
 					}
 				}
 			}
@@ -56,7 +47,10 @@ export default function preferModuleStructure(options: { projectDir: string }) {
 				if (diff) {
 					for (let line of await diff.added()) {
 						if (line.contains(/^\+?\w*export/)) {
-							context.warn("foundNewLegacyConstant", constantFile, line)
+							context.warn("foundNewLegacyConstant", {
+								file: constantFile,
+								line,
+							})
 						}
 					}
 				}

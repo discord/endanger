@@ -9,6 +9,7 @@ import type File from "./File"
 import type Files from "./Files"
 import type Context from "./Context"
 import type Rule from "./Rule"
+import type Line from "./Line"
 
 export interface StructuredDiffBaseChange {
 	type: "add" | "del" | "normal"
@@ -79,7 +80,7 @@ export type ReportKind = "warn" | "fail" | "message"
 
 export interface ReportLocation {
 	file?: File
-	line?: number
+	line?: number | Line
 }
 
 export interface Report {
@@ -87,13 +88,14 @@ export interface Report {
 	rule: Rule<Messages>
 	messageId: string
 	locations: ReportLocation[]
+	values?: Values
 }
 
 export type Reporter<M extends Messages> = (
 	kind: ReportKind,
 	messageId: keyof M,
-	file?: File,
-	line?: number,
+	location: ReportLocation,
+	values: Values,
 ) => void
 
 export type Reader = () => Promise<string> | string
@@ -101,6 +103,8 @@ export type Reader = () => Promise<string> | string
 export interface Messages {
 	[key: string]: string
 }
+
+export type Values = Record<string, string>
 
 export interface RuleOptions<M extends Messages> {
 	files: string[]

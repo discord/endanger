@@ -170,9 +170,30 @@ export default function myRule() {
 ### `Context`
 
 ```ts
-context.warn("myMessage", file, line) // Note: `file` and `line` are optional
-context.fail("myMessage", file, line) // Note: `file` and `line` are optional
-context.message("myMessage", file, line) // Note: `file` and `line` are optional
+context.warn("myMessage", location?, values?)
+context.fail("myMessage", location?, values?)
+context.message("myMessage", location?, values?)
+
+// examples:
+context.warn("myMessage")
+context.warn("myMessage", { file })
+context.warn("myMessage", { file, line })
+context.warn("myMessage", { file, line }, { ...values })
+```
+
+Note: Your Rule's `messages` can have also have special `{values}` in them:
+
+```ts
+new Rule({
+  messages: {
+    myMessage: `
+      Hello {value}!
+    `,
+  },
+  async run(files, context) {
+    context.warn("myMessage", {}, { value: "World" }) // "Hello World!"
+  },
+})
 ```
 
 ### `Bytes`

@@ -64,13 +64,12 @@ export default function recommendStorybookExamples(options: {
 			for (let component of components) {
 				if (!hasMatchingStory(component, storybooks)) {
 					if (component.created) {
-						context.warn("foundNewComponentWithoutStory", component)
+						context.warn("foundNewComponentWithoutStory", { file: component })
 					} else if (component.modified) {
 						if (await isSignificantChange(component)) {
-							context.warn(
-								"foundComponentWithManyChangesWithoutStory",
-								component,
-							)
+							context.warn("foundComponentWithManyChangesWithoutStory", {
+								file: component,
+							})
 						}
 					}
 				}

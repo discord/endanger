@@ -1,4 +1,4 @@
-import IntlMessageFormat from "intl-messageformat"
+import IntlMessageFormat, { FormatXMLElementFn } from "intl-messageformat"
 import stripIndent from "strip-indent"
 import { Report, ReportLocation } from "../types"
 
@@ -77,7 +77,18 @@ function createHtmlTag(htmlTag: string) {
 	}
 }
 
-let BASE_FORMATTERS: Record<string, (chunks: string[]) => string> = {}
+type Formatters = Record<
+	string,
+	| string
+	| number
+	| boolean
+	| Date
+	| FormatXMLElementFn<string, string | string[]>
+	| null
+	| undefined
+>
+
+let BASE_FORMATTERS: Formatters = {}
 
 for (let htmlTag of SAFE_HTML_TAGS) {
 	BASE_FORMATTERS[htmlTag] = createHtmlTag(htmlTag)
@@ -121,6 +132,7 @@ export default function formatReport(report: Report) {
 	let formatted = joinFormattedMessage(
 		formatter.format<string>({
 			...BASE_FORMATTERS,
+			...report.values,
 		}),
 	)
 
