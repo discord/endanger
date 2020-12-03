@@ -72,7 +72,7 @@ export default function myFirstRule() {
         // Then you can report a warning/failure/etc by referencing your message
         // from the map of strings above. You can also optionally include a file
         // and even a line number.
-        context.warn("myFirstWarning", file)
+        context.warn("myFirstWarning", { file })
       }
     },
   })
@@ -101,7 +101,7 @@ export default function mySecondRule() {
         if (file.created) {
           // file.contains() will tell you if the file contains a string or regex
           if (!(await file.contains("@ratelimit("))) {
-            context.warn("foundNewRouteWithoutRateLimit", file)
+            context.warn("foundNewRouteWithoutRateLimit", { file })
           }
         }
 
@@ -112,9 +112,9 @@ export default function mySecondRule() {
           let after = await file.contains("@ratelimit(")
 
           if (before && !after) {
-            context.fail("foundAddedRateLimit", file)
+            context.fail("foundAddedRateLimit", { file })
           } else if (!before && after) {
-            context.message("foundAddedRateLimit", file)
+            context.message("foundAddedRateLimit", { file })
           }
         }
       }
