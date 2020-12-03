@@ -336,8 +336,8 @@ files.untouched // [File, File, ...]
 // Get all files regardless of if they have been touched or not.
 files.all // [File, File, ...]
 
-// Get a specific file.
-files.get("path/to/file.ext") // File | null
+// Get a specific file. (throws if it doesn't exist)
+files.get("path/to/file.ext") // File
 
 // Filter files by a set of glob patterns
 files.matches("path/to/**", "{glob,patterns}") // Files

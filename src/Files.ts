@@ -85,11 +85,11 @@ export default class Files {
 	/**
 	 * Get a specific file.
 	 */
-	get(relativePath: string): File | null {
+	get(relativePath: string): File {
 		if (danger.git.fileMatch(relativePath)) {
 			return new File(relativePath)
 		} else {
-			return null
+			throw new Error(`Could not find file ${relativePath}`)
 		}
 	}
 
