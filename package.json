@@ -1,6 +1,6 @@
 {
   "name": "endanger",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Build Dangerfiles with ease.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
