@@ -1,30 +1,27 @@
 import Rule from "./Rule"
-import Files from "./Files"
 import Context from "./Context"
 import ArrayMap from "./utils/ArrayMap"
 import Line from "./Line"
-import type { Report, Messages } from "./types"
+import type { Report, Messages, RuleMatchers, RuleValues } from "./types"
 // import mergeReports from "./utils/mergeReports"
 import formatReport from "./utils/formatReport"
 import execStdout from "./utils/execStdout"
-import matches from "./utils/matches"
+import createFilesFilter from "./filters/files"
+// import createLabelsFilter from "./filters/labels"
+import createCommitsFilter from "./filters/commits"
+import RuleFilter, { RuleFiltersMap } from "./RuleFilter"
 
 function getLineNumber(line: Line | number | undefined): number | undefined {
 	return line instanceof Line ? line.lineNumber : line
 }
 
 async function getAllFiles() {
-	let stdout = await execStdout("git", [
-		"ls-tree",
-		"--name-only",
-		"-r",
-		danger.git.head,
-	])
+	let stdout = await execStdout("git", ["ls-tree", "--name-only", "-r", danger.git.head])
 	let files = stdout.split("\n")
 	return files
 }
 
-export default async function run(...rules: Rule<any>[]) {
+async function _run(rules: Rule<Messages, RuleMatchers>[]) {
 	let reportsMap = new ArrayMap<string, Report>()
 	let allFiles
 
@@ -37,32 +34,35 @@ export default async function run(...rules: Rule<any>[]) {
 		return
 	}
 
+	let ruleFiltersMap: RuleFiltersMap = {
+		files: createFilesFilter(allFiles),
+		commits: createCommitsFilter(),
+		// labels: createLabelsFilter(),
+	}
+
 	for (let rule of rules) {
 		if (!(rule instanceof Rule)) {
 			throw new TypeError("Rules must be implemented with new Rule(...)")
 		}
 
-		let filesState = danger.git.fileMatch(...rule.files)
-
-		if (!(filesState.edited || filesState.deleted)) {
+		let matched = await RuleFilter.any(ruleFiltersMap, rule.match)
+		if (!matched) {
 			continue
 		}
 
-		let matchingFiles = matches(allFiles, rule.files)
-		let files = new Files(matchingFiles, filesState.getKeyedPaths())
-		let context = new Context<Messages>(
-			(kind, messageId: any, location, values) => {
-				reportsMap.append(messageId, {
-					rule,
-					messageId,
-					kind,
-					locations: [location],
-					values,
-				})
-			},
-		)
+		let context = new Context<Messages>((kind, messageId: any, location, values) => {
+			reportsMap.append(messageId, {
+				rule,
+				messageId,
+				kind,
+				locations: [location],
+				values,
+			})
+		})
 
-		await rule.run(files, context)
+		let ruleValues = await RuleFilter.buildRuleValues(ruleFiltersMap, rule.match, context)
+
+		await rule.run(ruleValues)
 	}
 
 	for (let reports of Array.from(reportsMap.values())) {
@@ -91,4 +91,9 @@ export default async function run(...rules: Rule<any>[]) {
 			}
 		}
 	}
+}
+
+export default function run(...rules: Rule<any, any>[]) {
+	// Have to wrap this function to add `Rule<any, any>` so TS doesn't yell at people for no reason.
+	return _run(rules)
 }

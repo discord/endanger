@@ -1,19 +1,20 @@
-import type Files from "./Files"
-import type Context from "./Context"
-import type { Messages } from "./types"
+import type { Messages, RuleMatchers, RuleValues } from "./types"
 
-export interface RuleOptions<M extends Messages> {
-	files: string[]
+export interface RuleOptions<M extends Messages, F extends RuleMatchers> {
+	match: F
 	messages: M
-	run(files: Files, context: Context<M>): Promise<void> | void
+	run(values: RuleValues<M, F>): Promise<void> | void
 }
 
-export default class Rule<M extends Messages> implements RuleOptions<M> {
-	files: string[]
+export default class Rule<M extends Messages, F extends RuleMatchers> implements RuleOptions<M, F> {
+	match: F
 	messages: M
-	run: (files: Files, context: Context<M>) => Promise<void> | void
-	constructor(options: RuleOptions<M>) {
-		this.files = options.files
+	run: (values: RuleValues<M, F>) => Promise<void> | void
+	constructor(options: RuleOptions<M, F>) {
+		if (Object.keys(options.match).length === 0) {
+			throw new Error("Your rule must have at least one filter")
+		}
+		this.match = options.match
 		this.messages = options.messages
 		this.run = options.run
 	}
