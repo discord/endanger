@@ -26,7 +26,16 @@ async function getAllFiles() {
 
 export default async function run(...rules: Rule<any>[]) {
 	let reportsMap = new ArrayMap<string, Report>()
-	let allFiles = await getAllFiles()
+	let allFiles
+
+	// TODO: This is bad, but it's a temporary fix to stop making noise in PRs
+	// that aren't based on the primary branch.
+	try {
+		allFiles = await getAllFiles()
+	} catch (error) {
+		console.warn("Git failed, bailing out.")
+		return
+	}
 
 	for (let rule of rules) {
 		if (!(rule instanceof Rule)) {
