@@ -76,6 +76,10 @@ export interface GitDiffStats {
 	after: number
 }
 
+export interface UnifiedOptions {
+	distance?: number
+}
+
 export type ReportKind = "warn" | "fail" | "message"
 
 export interface ReportLocation {
