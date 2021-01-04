@@ -42,7 +42,9 @@ export default function recommendStorybookExamples(options: {
 	let componentPattern = `${options.componentDir}/**/*.tsx`
 	let storybookPattern = `${options.storybookDir}/**/*.tsx`
 	return new Rule({
-		files: [componentPattern, storybookPattern],
+		match: {
+			files: [componentPattern, storybookPattern],
+		},
 		messages: {
 			foundNewComponentWithoutStory: `
 				Please add a story for new components
@@ -52,7 +54,7 @@ export default function recommendStorybookExamples(options: {
 				it has a corresponding story?
 			`,
 		},
-		async run(files, context) {
+		async run({ files, context }) {
 			let components = files.matches(componentPattern).edited
 			let storybooks = files.matches(storybookPattern).all
 

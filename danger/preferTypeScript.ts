@@ -2,7 +2,9 @@ import { Rule } from "../src"
 
 export default function preferTypeScript() {
 	return new Rule({
-		files: ["**/*.{js,jsx,ts,tsx}", "**"],
+		match: {
+			files: ["**/*.{js,jsx,ts,tsx}", "**"],
+		},
 		messages: {
 			foundNewJSFile: `
 				**Use TypeScript for new code files**
@@ -30,7 +32,7 @@ export default function preferTypeScript() {
 				Migrate Flow-typed JavaScript files to TypeScript
 			`,
 		},
-		async run(files, context) {
+		async run({ files, context }) {
 			for (let file of files.touched) {
 				if (file.matches("*.{js,jsx}")) {
 					if (file.created) {
@@ -42,9 +44,7 @@ export default function preferTypeScript() {
 							} else {
 								context.warn("foundChangedFlowFile", { file })
 							}
-						} else if (
-							await file.diff().changedBy({ added: 0.1, removed: 0.5 })
-						) {
+						} else if (await file.diff().changedBy({ added: 0.1, removed: 0.5 })) {
 							context.warn("foundJSFileWithManyChanges", { file })
 						}
 					}

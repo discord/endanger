@@ -10,6 +10,7 @@ import type Files from "./Files"
 import type Context from "./Context"
 import type Rule from "./Rule"
 import type Line from "./Line"
+import type Commit from "./Commit"
 
 export interface StructuredDiffBaseChange {
 	type: "add" | "del" | "normal"
@@ -89,7 +90,7 @@ export interface ReportLocation {
 
 export interface Report {
 	kind: ReportKind
-	rule: Rule<Messages>
+	rule: Rule<Messages, RuleMatchers>
 	messageId: string
 	locations: ReportLocation[]
 	values?: Values
@@ -104,6 +105,12 @@ export type Reporter<M extends Messages> = (
 
 export type Reader = () => Promise<string> | string
 
+export interface RuleMatchers {
+	files?: string[]
+	commits?: (string | RegExp)[]
+	// labels?: (string | RegExp)[]
+}
+
 export interface Messages {
 	[key: string]: string
 }
@@ -117,6 +124,13 @@ export interface RuleOptions<M extends Messages> {
 	helpLink?: string
 	messages: M
 	run(files: Files, context: Context<M>): Promise<void> | void
+}
+
+export interface RuleValues<M extends Messages, F extends RuleMatchers> {
+	files: F["files"] extends NonNullable<RuleMatchers["files"]> ? Files : null
+	commits: F["commits"] extends NonNullable<RuleMatchers["commits"]> ? Commit[] : null
+	// labels: F["labels"] extends NonNullable<RuleMatchers["labels"]> ? unknown[] : null
+	context: Context<M>
 }
 
 declare global {

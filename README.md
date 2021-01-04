@@ -12,8 +12,7 @@
 npm install --save-dev endanger
 ```
 
-> **Note:** Endanger requires `danger@10.5.3` and above. Please update your
-> `danger` dependency.
+> **Note:** Endanger requires `danger@10.5.3` and above. Please update your `danger` dependency.
 
 Create a file system like this:
 
@@ -55,8 +54,10 @@ import { Rule } from "endanger"
 
 export default function myFirstRule() {
   return new Rule({
-    // "Glob" patterns of files you want to look at in this rule.
-    files: ["scary-directory/**"],
+    match: {
+      // "Glob" patterns of files you want to look at in this rule.
+      files: ["scary-directory/**"],
+    },
     // A map of strings for different warnings/failures/etc so you don't have to
     // clutter your rule code.
     messages: {
@@ -66,7 +67,7 @@ export default function myFirstRule() {
       `,
     },
     // And here goes your code for the rule...
-    async run(files, context) {
+    async run({ files, context }) {
       // You can explore the state of the files you matched with your glob patterns.
       for (let file of files.created) {
         // Then you can report a warning/failure/etc by referencing your message
@@ -79,22 +80,24 @@ export default function myFirstRule() {
 }
 ```
 
-This rule warns you whenever you create a new file in the `scary-directory/`.
-But endanger makes it easy to write lots of other types of rules.
+This rule warns you whenever you create a new file in the `scary-directory/`. But endanger makes it
+easy to write lots of other types of rules.
 
 ```ts
 import { Rule } from "endanger"
 
 export default function mySecondRule() {
   return new Rule({
-    files: ["api/routes/*.py"],
+    match: {
+      files: ["api/routes/*.py"],
+    },
     messages: {
       foundNewRouteWithoutRateLimit: `...`,
       foundRemovedRateLimit: `...`,
       foundAddedRateLimit: `...`,
     },
     // And here goes your code for the rule...
-    async run(files, context) {
+    async run({ files, context }) {
       // files.edited will give you a list of all files created or modified
       for (let file of files.edited) {
         // file.created will tell you if the current file was created in this diff
@@ -122,6 +125,38 @@ export default function mySecondRule() {
   })
 }
 ```
+
+You can have rules that fire on things other than `files`, you could also match commits like so:
+
+```ts
+import { Rule } from "endanger"
+
+let TICKET_REGEX = /\b(JIRA-\d+)\b/
+
+export default function mySecondRule() {
+  return new Rule({
+    match: {
+      commit: [TICKET_REGEX],
+    },
+    messages: {
+      jiraLink: `
+        [View linked ticket {ticket} on JIRA](https://jira.intranet.corp/{ticket})
+      `,
+    },
+    async run({ commits, context }) {
+      for (let commit of commits) {
+        let match = commit.message.match(TICKET_REGEX)
+        if (match) {
+          context.message("jiraLink", {}, { ticket: match[1] })
+        }
+      }
+    },
+  })
+}
+```
+
+> **Important!** You can only access `files` or `commits` in your rule if you have a `match` filter
+> defined for them. And you can only access files or commits which match your defined filter.
 
 ## API
 
@@ -151,21 +186,24 @@ import { Rule } from "endanger"
 
 export default function myRule() {
   return new Rule({
-    files: ["path/to/**", "{glob,patterns}"],
+    match: {
+      files: ["path/to/**", "{glob,patterns}"],
+      commits: ["messages that contain this string", /or match this regex/],
+    },
     messages: {
       myFirstWarning: `...`,
       mySecondWarning: `...`,
     },
-    async run(files, context) {
+    async run({ files, commits, context }) {
       // ...
     },
   })
 }
 ```
 
-> **Note:** It's recommended you wrap your rules with a function so you could
-> add options to them later. For example, you could run the same rule twice on
-> different directories provided as options.
+> **Note:** It's recommended you wrap your rules with a function so you could add options to them
+> later. For example, you could run the same rule twice on different directories provided as
+> options.
 
 ### `Context`
 
@@ -198,8 +236,8 @@ new Rule({
 
 ### `Bytes`
 
-This represents some readable data whether it be a [`File`](#file),
-[`FileState`](#FileState), or [`Diff`](#diff).
+This represents some readable data whether it be a [`File`](#file), [`FileState`](#FileState), or
+[`Diff`](#diff).
 
 ```ts
 // Read the contents of this file/diff/etc.

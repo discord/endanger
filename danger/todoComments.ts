@@ -2,7 +2,9 @@ import { Rule } from "../src"
 
 export default function todoComments() {
 	return new Rule({
-		files: ["**/*.{js,ts,tsx}"],
+		match: {
+			files: ["**/*.{js,ts,tsx}"],
+		},
 		messages: {
 			fixTodoComment: `
         Reminder: There's a TODO comment nearby some code you changed. If you
@@ -11,8 +13,8 @@ export default function todoComments() {
         address it as part of your PR?
       `,
 		},
-		async run(files, context) {
-			for (let file of files.matches("src/Diff.ts").all) {
+		async run({ files, context }) {
+			for (let file of files.edited) {
 				let lines = await file.diff().unified()
 
 				for (let line of lines) {

@@ -1,5 +1,4 @@
 import type { Messages, Reporter, ReportLocation, Values } from "./types"
-import Line from "./Line"
 
 export default class Context<M extends Messages> {
 	private _reporter: Reporter<M>
@@ -8,27 +7,15 @@ export default class Context<M extends Messages> {
 		this._reporter = reporter
 	}
 
-	warn(
-		messageId: keyof M,
-		location: ReportLocation = {},
-		values: Values = {},
-	): void {
+	warn(messageId: keyof M, location: ReportLocation = {}, values: Values = {}): void {
 		this._reporter("warn", messageId, location, values)
 	}
 
-	fail(
-		messageId: keyof M,
-		location: ReportLocation = {},
-		values: Values = {},
-	): void {
+	fail(messageId: keyof M, location: ReportLocation = {}, values: Values = {}): void {
 		this._reporter("fail", messageId, location, values)
 	}
 
-	message(
-		messageId: string,
-		location: ReportLocation = {},
-		values: Values = {},
-	): void {
+	message(messageId: keyof M, location: ReportLocation = {}, values: Values = {}): void {
 		this._reporter("message", messageId, location, values)
 	}
 }

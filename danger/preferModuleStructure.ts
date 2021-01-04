@@ -2,7 +2,9 @@ import { Rule } from "../src"
 
 export default function preferModuleStructure(options: { projectDir: string }) {
 	return new Rule({
-		files: [`${options.projectDir}/**`],
+		match: {
+			files: [`${options.projectDir}/**`],
+		},
 		messages: {
 			foundLegacyFileWithManyChanges: `
         **Consider moving this file to \`@app/modules\`**
@@ -23,7 +25,7 @@ export default function preferModuleStructure(options: { projectDir: string }) {
         the codebase organized.
       `,
 		},
-		async run(files, context) {
+		async run({ files, context }) {
 			let legacyFiles = files.matches(
 				`${options.projectDir}/{actions,stores,components,components_common,components_ios}/**/*`,
 			)
@@ -38,9 +40,7 @@ export default function preferModuleStructure(options: { projectDir: string }) {
 				}
 			}
 
-			let constantFiles = files.matches(
-				`${options.projectDir}/{Constants.tsx,ConstantsIOS.tsx}`,
-			)
+			let constantFiles = files.matches(`${options.projectDir}/{Constants.tsx,ConstantsIOS.tsx}`)
 
 			for (let constantFile of constantFiles.modified) {
 				let diff = constantFile.diff()

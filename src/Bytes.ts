@@ -1,5 +1,5 @@
 import type { Reader } from "./types"
-import contains from "./utils/contains"
+import contains, { Matcher } from "./utils/contains"
 
 export default class Bytes {
 	private _reader: Reader
@@ -19,7 +19,7 @@ export default class Bytes {
 	/**
 	 * Does this file/diff/etc contain a string or match a regex?
 	 */
-	async contains(matcher: string | RegExp): Promise<boolean> {
+	async contains(matcher: Matcher): Promise<boolean> {
 		let contents = await this.contents()
 		return contains(contents, matcher)
 	}
