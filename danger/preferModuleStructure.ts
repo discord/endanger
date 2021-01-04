@@ -44,14 +44,12 @@ export default function preferModuleStructure(options: { projectDir: string }) {
 
 			for (let constantFile of constantFiles.modified) {
 				let diff = constantFile.diff()
-				if (diff) {
-					for (let line of await diff.added()) {
-						if (line.contains(/^\+?\w*export/)) {
-							context.warn("foundNewLegacyConstant", {
-								file: constantFile,
-								line,
-							})
-						}
+				for (let line of await diff.added()) {
+					if (line.contains(/^\+?\w*export/)) {
+						context.warn("foundNewLegacyConstant", {
+							file: constantFile,
+							line,
+						})
 					}
 				}
 			}

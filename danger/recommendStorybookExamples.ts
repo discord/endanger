@@ -15,11 +15,6 @@ function hasMatchingStory(component: File, storybooks: File[]): boolean {
 
 async function isSignificantChange(component: File): Promise<boolean> {
 	let diff = component.diff()
-
-	if (!diff) {
-		return false
-	}
-
 	let stats = await diff.stats()
 
 	let thresholds: DiffThresholds

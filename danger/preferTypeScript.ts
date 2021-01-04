@@ -43,7 +43,7 @@ export default function preferTypeScript() {
 								context.warn("foundChangedFlowFile", { file })
 							}
 						} else if (
-							await file.diff()?.changedBy({ added: 0.1, removed: 0.5 })
+							await file.diff().changedBy({ added: 0.1, removed: 0.5 })
 						) {
 							context.warn("foundJSFileWithManyChanges", { file })
 						}
