@@ -14,7 +14,7 @@ export default function todoComments() {
       `,
 		},
 		async run({ files, context }) {
-			for (let file of files.matches("src/Diff.ts").all) {
+			for (let file of files.edited) {
 				let lines = await file.diff().unified()
 
 				for (let line of lines) {

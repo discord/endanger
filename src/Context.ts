@@ -15,7 +15,7 @@ export default class Context<M extends Messages> {
 		this._reporter("fail", messageId, location, values)
 	}
 
-	message(messageId: string, location: ReportLocation = {}, values: Values = {}): void {
+	message(messageId: keyof M, location: ReportLocation = {}, values: Values = {}): void {
 		this._reporter("message", messageId, location, values)
 	}
 }

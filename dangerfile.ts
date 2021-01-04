@@ -4,6 +4,7 @@ import recommendStoreV2 from "./danger/recommendStoreV2"
 import recommendStorybookExamples from "./danger/recommendStorybookExamples"
 import preferModuleStructure from "./danger/preferModuleStructure"
 import todoComments from "./danger/todoComments"
+import commitJiraLink from "./danger/commitJiraLink"
 
 run(
 	// Please add rules in alphabetical order
@@ -21,4 +22,5 @@ run(
 		projectDir: "app",
 	}),
 	todoComments(),
+	commitJiraLink(),
 )
