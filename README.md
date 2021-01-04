@@ -254,14 +254,17 @@ await file.lines() // [Line, Line, Line]
 ### `Diff`
 
 ```ts
-// only the added lines
+// Only the added lines
 await diff.added() // [Line, Line, Line]
 
-// only the removed lines
+// Only the removed lines
 await diff.removed() // [Line, Line, Line]
 
-// all of the changed lines
+// All of the changed lines
 await diff.changed() // [Line, Line, Line, Line, Line, Line]
+
+// All of the changed lines with several lines of surrounding context
+await diff.unified()
 
 // Returns a JSONDiff of the file (assuming the file is JSON)
 await diff.jsonDiff() // JSONDiff { ... }

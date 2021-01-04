@@ -80,11 +80,7 @@ export default class File extends FileState {
 	/**
 	 * Get information about the diff of the file
 	 */
-	diff(): Diff | null {
-		if (this.created) {
-			return null
-		} else {
-			return new Diff(this.path)
-		}
+	diff(): Diff {
+		return new Diff(this)
 	}
 }

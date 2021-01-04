@@ -1,6 +1,12 @@
 import type { TextDiff } from "danger"
 import Line from "./Line"
-import type { DiffThresholds, GitDiffStats, StructuredDiff } from "./types"
+import type File from "./File"
+import type {
+	DiffThresholds,
+	GitDiffStats,
+	StructuredDiff,
+	UnifiedOptions,
+} from "./types"
 
 function assertPercentage(value: number | undefined): value is number {
 	if (typeof value !== "number") {
@@ -39,17 +45,21 @@ function cleanupDiffLines(lines: string) {
 }
 
 export default class Diff {
-	private _relativeFilePath: string
+	private _file: File
 
-	constructor(relativeFilePath: string) {
-		this._relativeFilePath = relativeFilePath
+	constructor(file: File) {
+		this._file = file
 	}
 
 	/**
-	 * only the added lines
+	 * Only the added lines
 	 */
 	async added(): Promise<Line[]> {
-		let diff = await getStructuredDiff(this._relativeFilePath)
+		if (this._file.created) {
+			return await this._file.lines()
+		}
+
+		let diff = await getStructuredDiff(this._file.path)
 		let lines = []
 
 		for (let chunk of diff.chunks) {
@@ -68,10 +78,14 @@ export default class Diff {
 	}
 
 	/**
-	 * only the removed lines
+	 * Only the removed lines
 	 */
 	async removed(): Promise<Line[]> {
-		let diff = await getStructuredDiff(this._relativeFilePath)
+		if (this._file.created) {
+			return []
+		}
+
+		let diff = await getStructuredDiff(this._file.path)
 		let lines = []
 
 		for (let chunk of diff.chunks) {
@@ -90,10 +104,14 @@ export default class Diff {
 	}
 
 	/**
-	 * Chunks of the changed lines
+	 * All of the changed lines
 	 */
 	async changed(): Promise<Line[]> {
-		let diff = await getStructuredDiff(this._relativeFilePath)
+		if (this._file.created) {
+			return await this._file.lines()
+		}
+
+		let diff = await getStructuredDiff(this._file.path)
 		let lines = []
 
 		for (let chunk of diff.chunks) {
@@ -112,16 +130,85 @@ export default class Diff {
 	}
 
 	/**
+	 * All of the changed lines with `distance` lines of context.
+	 */
+	async unified(options: UnifiedOptions = {}): Promise<Line[]> {
+		if (options.distance != null) {
+			throw new Error(
+				"diff.unified(..) with a `distance` is not currently supported",
+			)
+		}
+
+		if (this._file.created) {
+			return await this._file.lines()
+		}
+
+		let diff = await getStructuredDiff(this._file.path)
+		let lines = []
+
+		for (let chunk of diff.chunks) {
+			for (let change of chunk.changes) {
+				let lineNumber = change.normal ? change.ln2 : change.ln
+				lines.push(
+					new Line(lineNumber, () => {
+						return cleanupDiffLines(change.content)
+					}),
+				)
+			}
+		}
+
+		return lines
+
+		// let distance = options.distance ?? 3
+
+		// let allLines = await this._file.lines()
+		// let lastLineNumber = allLines[allLines.length - 1].lineNumber
+
+		// let changedLines = await this.changed()
+		// let matchingLines: Record<number, true> = {}
+
+		// for (let changedLine of changedLines) {
+		// 	let start = Math.max(changedLine.lineNumber - distance, 0)
+		// 	let end = Math.min(changedLine.lineNumber + distance, lastLineNumber)
+
+		// 	for (let lineNumber = start; lineNumber <= end; lineNumber++) {
+		// 		matchingLines[lineNumber] = true
+		// 	}
+		// }
+
+		// let unifiedLines: Line[] = []
+
+		// for (let line of allLines) {
+		// 	if (matchingLines[line.lineNumber]) {
+		// 		unifiedLines.push(line)
+		// 	}
+		// }
+
+		// return unifiedLines
+	}
+
+	/**
 	 * Get stats on the diff (number of changed/added/removed/etc lines)
 	 */
 	async stats(): Promise<GitDiffStats> {
-		let diff = await getTextDiff(this._relativeFilePath)
-		return {
-			changed: diff.diff.split("\n").length,
-			added: diff.added.split("\n").length,
-			removed: diff.removed.split("\n").length,
-			before: diff.before.split("\n").length,
-			after: diff.after.split("\n").length,
+		if (this._file.created) {
+			let lines = await this._file.lines()
+			return {
+				changed: lines.length,
+				added: lines.length,
+				removed: 0,
+				before: 0,
+				after: lines.length,
+			}
+		} else {
+			let diff = await getTextDiff(this._file.path)
+			return {
+				changed: diff.diff.split("\n").length,
+				added: diff.added.split("\n").length,
+				removed: diff.removed.split("\n").length,
+				before: diff.before.split("\n").length,
+				after: diff.after.split("\n").length,
+			}
 		}
 	}
 
