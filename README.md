@@ -310,7 +310,7 @@ await file.moved() // true/false
 file.before() // File | null
 
 // Get information about the diff of the file
-file.diff() // Diff | null
+file.diff() // Diff
 ```
 
 ### `Files`
