@@ -1,6 +1,6 @@
 import IntlMessageFormat, { FormatXMLElementFn } from "intl-messageformat"
 import stripIndent from "strip-indent"
-import { Report, ReportLocation } from "../types"
+import { Report } from "../types"
 
 let SAFE_HTML_TAGS = [
 	"h1",
@@ -94,38 +94,6 @@ for (let htmlTag of SAFE_HTML_TAGS) {
 	BASE_FORMATTERS[htmlTag] = createHtmlTag(htmlTag)
 }
 
-function locationToString(location: ReportLocation, joiner: string = ":") {
-	if (location.file && location.line) {
-		return `${location.file.path}:${location.line}`
-	} else if (location.file) {
-		return location.file.path
-	} else {
-		return ""
-	}
-}
-
-function formatLocationLink(location: ReportLocation): string {
-	if (danger.github) {
-		return danger.github.utils.fileLinks([locationToString(location, "#L")])
-	} else {
-		return `./${locationToString(location)}`
-	}
-}
-
-function createLocationsMarkup(locations: ReportLocation[]): string {
-	if (locations.length === 0) {
-		return ""
-	} else if (locations.length === 1) {
-		return formatLocationLink(locations[0])
-	} else {
-		return locations
-			.map((location) => {
-				return `- ${formatLocationLink(location)}`
-			})
-			.join("\n")
-	}
-}
-
 export default function formatReport(report: Report) {
 	let message = stripIndent(report.rule.messages[report.messageId]).trim()
 	let formatter = new IntlMessageFormat(stripIndent(message).trim())
@@ -135,11 +103,6 @@ export default function formatReport(report: Report) {
 			...report.values,
 		}),
 	)
-
-	if (report.locations.length > 1) {
-		let locationsMarkup = createLocationsMarkup(report.locations)
-		formatted += `\n\n${locationsMarkup}`
-	}
 
 	return formatted
 }

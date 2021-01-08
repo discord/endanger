@@ -3,7 +3,7 @@ import { Rule } from "../src"
 export default function preferTypeScript() {
 	return new Rule({
 		match: {
-			files: ["**/*.{js,jsx,ts,tsx}", "**"],
+			files: ["**/*.{js,jsx,ts,tsx}"],
 		},
 		messages: {
 			foundNewJSFile: `

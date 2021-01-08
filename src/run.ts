@@ -1,9 +1,7 @@
 import Rule from "./Rule"
 import Context from "./Context"
-import ArrayMap from "./utils/ArrayMap"
 import Line from "./Line"
-import type { Report, Messages, RuleMatchers, RuleValues } from "./types"
-// import mergeReports from "./utils/mergeReports"
+import type { Report, Messages, RuleMatchers } from "./types"
 import formatReport from "./utils/formatReport"
 import execStdout from "./utils/execStdout"
 import createFilesFilter from "./filters/files"
@@ -22,7 +20,7 @@ async function getAllFiles() {
 }
 
 async function _run(rules: Rule<Messages, RuleMatchers>[]) {
-	let reportsMap = new ArrayMap<string, Report>()
+	let reports: Report[] = []
 	let allFiles
 
 	// TODO: This is bad, but it's a temporary fix to stop making noise in PRs
@@ -51,13 +49,7 @@ async function _run(rules: Rule<Messages, RuleMatchers>[]) {
 		}
 
 		let context = new Context<Messages>((kind, messageId: any, location, values) => {
-			reportsMap.append(messageId, {
-				rule,
-				messageId,
-				kind,
-				locations: [location],
-				values,
-			})
+			reports.push({ rule, messageId, kind, location, values })
 		})
 
 		let ruleValues = await RuleFilter.buildRuleValues(ruleFiltersMap, rule.match, context)
@@ -65,30 +57,20 @@ async function _run(rules: Rule<Messages, RuleMatchers>[]) {
 		await rule.run(ruleValues)
 	}
 
-	for (let reports of Array.from(reportsMap.values())) {
-		// TODO: Should rework this to be based on message contents not message keys
-		// reports = mergeReports(reports)
+	for (let report of reports) {
+		let msg = formatReport(report)
 
-		for (let report of reports) {
-			let msg = formatReport(report)
+		let file = report.location.file?.path
+		let line = getLineNumber(report.location.line)
 
-			let file: string | undefined
-			let line: number | undefined
-
-			if (report.locations.length === 1) {
-				file = report.locations[0].file?.path
-				line = getLineNumber(report.locations[0].line)
-			}
-
-			if (report.kind === "fail") {
-				fail(msg, file, line)
-			} else if (report.kind === "warn") {
-				warn(msg, file, line)
-			} else if (report.kind === "message") {
-				message(msg, file, line)
-			} else {
-				throw new Error("Unknown report kind")
-			}
+		if (report.kind === "fail") {
+			fail(msg, file, line)
+		} else if (report.kind === "warn") {
+			warn(msg, file, line)
+		} else if (report.kind === "message") {
+			message(msg, file, line)
+		} else {
+			throw new Error("Unknown report kind")
 		}
 	}
 }

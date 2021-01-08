@@ -92,7 +92,7 @@ export interface Report {
 	kind: ReportKind
 	rule: Rule<Messages, RuleMatchers>
 	messageId: string
-	locations: ReportLocation[]
+	location: ReportLocation
 	values?: Values
 }
 
