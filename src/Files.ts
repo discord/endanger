@@ -26,7 +26,7 @@ export default class Files {
 	 * Get all of the deleted files.
 	 */
 	get deleted(): File[] {
-		return this._keyedPaths.deleted.map((filePath) => {
+		return unique(this._keyedPaths.deleted).map((filePath) => {
 			return new File(filePath)
 		})
 	}
@@ -35,7 +35,7 @@ export default class Files {
 	 * Get all of the modified files.
 	 */
 	get modified(): File[] {
-		return this._keyedPaths.modified.map((filePath) => {
+		return unique(this._keyedPaths.modified).map((filePath) => {
 			return new File(filePath)
 		})
 	}
@@ -44,7 +44,7 @@ export default class Files {
 	 * Get all of the edited files.
 	 */
 	get edited(): File[] {
-		return this._keyedPaths.edited.map((filePath) => {
+		return unique(this._keyedPaths.edited).map((filePath) => {
 			return new File(filePath)
 		})
 	}
@@ -53,10 +53,7 @@ export default class Files {
 	 * Get all of the touched files.
 	 */
 	get touched(): File[] {
-		return unique([
-			...this._keyedPaths.edited,
-			...this._keyedPaths.deleted,
-		]).map((filePath) => {
+		return unique([...this._keyedPaths.edited, ...this._keyedPaths.deleted]).map((filePath) => {
 			return new File(filePath)
 		})
 	}
