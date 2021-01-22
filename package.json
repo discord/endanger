@@ -20,7 +20,12 @@
     "intl-messageformat": "^9.3.19",
     "memoize-one": "^5.1.1",
     "micromatch": "^4.0.2",
+    "remark-gfm": "^1.0.0",
+    "remark-parse": "^9.0.0",
+    "remark-stringify": "^9.0.1",
     "strip-indent": "^3.0.0",
+    "unified": "^9.2.0",
+    "unist-util-visit": "^2.0.3",
     "yaml": "^1.10.0"
   },
   "peerDependencies": {
