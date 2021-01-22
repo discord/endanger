@@ -7,8 +7,7 @@ import stringify from "remark-stringify"
 import visit from "unist-util-visit"
 import { Report } from "../types"
 
-let parser = unified().use(parse).use(gfm)
-let generator = unified().use(stringify)
+let markdown = unified().use(parse).use(gfm).use(stringify)
 
 let SAFE_HTML_TAGS = [
 	"h1",
@@ -103,14 +102,14 @@ for (let htmlTag of SAFE_HTML_TAGS) {
 }
 
 export default function formatReport(report: Report) {
-	let ast = parser.parse(stripIndent(report.rule.messages[report.messageId]).trim())
+	let ast = markdown.parse(stripIndent(report.rule.messages[report.messageId]).trim())
 
 	visit(ast, "text", (node: any) => {
 		// normalize line breaks
 		node.value = node.value.split("\n").join(" ")
 	})
 
-	let message = generator.stringify(ast)
+	let message = markdown.stringify(ast)
 	let formatter = new IntlMessageFormat(message)
 
 	let formatted = joinFormattedMessage(
