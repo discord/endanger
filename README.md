@@ -286,7 +286,10 @@ await file.json() // { ... }
 await file.yaml() // { ... }
 
 // Read this file line by line
-await file.lines() // [Line, Line, Line]
+await file.lines() // [Line (1), Line (2), Line (3)]
+await file.lines({ after: line1 }) // [Line (2), Line (3)]
+await file.lines({ before: line3 }) // [Line (1), Line (2)]
+await file.lines({ after: line1, before: line3 }) // [Line (2)]
 ```
 
 ### `Diff`

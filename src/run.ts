@@ -1,6 +1,5 @@
 import Rule from "./Rule"
 import Context from "./Context"
-import Line from "./Line"
 import type { Report, Messages, RuleMatchers } from "./types"
 import formatReport from "./utils/formatReport"
 import execStdout from "./utils/execStdout"
@@ -8,10 +7,6 @@ import createFilesFilter from "./filters/files"
 // import createLabelsFilter from "./filters/labels"
 import createCommitsFilter from "./filters/commits"
 import RuleFilter, { RuleFiltersMap } from "./RuleFilter"
-
-function getLineNumber(line: Line | number | undefined): number | undefined {
-	return line instanceof Line ? line.lineNumber : line
-}
 
 async function getAllFiles() {
 	let stdout = await execStdout("git", ["ls-tree", "--name-only", "-r", danger.git.head])
@@ -61,7 +56,7 @@ async function _run(rules: Rule<Messages, RuleMatchers>[]) {
 		let msg = formatReport(report)
 
 		let file = report.location.file?.path
-		let line = getLineNumber(report.location.line)
+		let line = report.location.line?.lineNumber
 
 		if (report.kind === "fail") {
 			fail(msg, file, line)

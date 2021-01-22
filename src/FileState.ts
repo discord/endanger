@@ -5,6 +5,11 @@ import Bytes from "./Bytes"
 import Line from "./Line"
 import type { Reader } from "./types"
 
+export interface LinesOptions {
+	after?: Line
+	before?: Line
+}
+
 export default class FileState extends Bytes {
 	private _filePath: string
 
@@ -72,9 +77,21 @@ export default class FileState extends Bytes {
 	/**
 	 * Read this file line by line
 	 */
-	async lines(): Promise<Line[]> {
+	async lines(options: LinesOptions = {}): Promise<Line[]> {
+		let afterIndex: number | undefined
+		let beforeIndex: number | undefined
+
+		if (options.after) {
+			afterIndex = options.after.lineNumber
+		}
+		if (options.before) {
+			beforeIndex = options.before.lineNumber - 2
+		}
+
 		let contents = await this.contents()
-		return contents.split("\n").map((line, index) => {
+		let rawLines = contents.split("\n").slice(afterIndex, beforeIndex)
+
+		return rawLines.map((line, index) => {
 			return new Line(index + 1, () => line)
 		})
 	}

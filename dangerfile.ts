@@ -5,6 +5,7 @@ import recommendStorybookExamples from "./danger/recommendStorybookExamples"
 import preferModuleStructure from "./danger/preferModuleStructure"
 import todoComments from "./danger/todoComments"
 import commitJiraLink from "./danger/commitJiraLink"
+import checkAPIEndpointLimits from "./danger/checkAPIEndpointLimits"
 
 run(
 	// Please add rules in alphabetical order
@@ -23,4 +24,5 @@ run(
 	}),
 	todoComments(),
 	commitJiraLink(),
+	checkAPIEndpointLimits(),
 )

@@ -85,7 +85,7 @@ export type ReportKind = "warn" | "fail" | "message"
 
 export interface ReportLocation {
 	file?: File
-	line?: number | Line
+	line?: Line
 }
 
 export interface Report {
