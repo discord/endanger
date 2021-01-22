@@ -34,7 +34,6 @@ export default function preferTypeScript() {
 		},
 		async run({ files, context }) {
 			for (let file of files.touched) {
-				context.warn("foundNewJSFile", { file })
 				if (file.matches("*.{js,jsx}")) {
 					if (file.created) {
 						context.warn("foundNewJSFile", { file })
