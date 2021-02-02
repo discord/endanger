@@ -32,7 +32,7 @@ export default class Files {
 	}
 
 	/**
-	 * Get all of the modified files.
+	 * Get all of the modified files. (This doesn't include created files)
 	 */
 	get modified(): File[] {
 		return unique(this._keyedPaths.modified).map((filePath) => {
@@ -41,7 +41,7 @@ export default class Files {
 	}
 
 	/**
-	 * Get all of the edited files.
+	 * Get all of the edited (created or modified) files.
 	 */
 	get edited(): File[] {
 		return unique(this._keyedPaths.edited).map((filePath) => {
@@ -50,7 +50,7 @@ export default class Files {
 	}
 
 	/**
-	 * Get all of the touched files.
+	 * Get all of the touched (created, modified, or deleted) files.
 	 */
 	get touched(): File[] {
 		return unique([...this._keyedPaths.edited, ...this._keyedPaths.deleted]).map((filePath) => {
