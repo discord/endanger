@@ -335,7 +335,7 @@ file.created // true/false
 // Has the file been deleted?
 file.deleted // true/false
 
-// Has the file been modified?
+// Has the file been modified? (This doesn't include created files)
 file.modified // true/false
 
 // Has the file been edited (created or modified)?
@@ -365,7 +365,7 @@ files.created // [File, File, ...]
 // Get all of the deleted files.
 files.deleted // [File, File, ...]
 
-// Get all of the modified files.
+// Get all of the modified (not including created) files.
 files.modified // [File, File, ...]
 
 // Get all of the edited (created or modified) files.
