@@ -368,10 +368,10 @@ files.deleted // [File, File, ...]
 // Get all of the modified files.
 files.modified // [File, File, ...]
 
-// Get all of the edited files.
+// Get all of the edited (created or modified) files.
 files.edited // [File, File, ...]
 
-// Get all of the touched files.
+// Get all of the touched (created, modified, or deleted) files.
 files.touched // [File, File, ...]
 
 // Get all of the untouched files.
