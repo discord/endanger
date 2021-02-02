@@ -35,7 +35,7 @@ export default class File extends FileState {
 	}
 
 	/**
-	 * Has the file been modified?
+	 * Has the file been modified? (This doesn't include created files)
 	 */
 	get modified(): boolean {
 		return getGitMatchResult(this.path).modified
