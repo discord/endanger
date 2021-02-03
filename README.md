@@ -98,8 +98,8 @@ export default function mySecondRule() {
     },
     // And here goes your code for the rule...
     async run({ files, context }) {
-      // files.edited will give you a list of all files created or modified
-      for (let file of files.edited) {
+      // files.modifiedOrCreated will give you a list of all files created or modified
+      for (let file of files.modifiedOrCreated) {
         // file.created will tell you if the current file was created in this diff
         if (file.created) {
           // file.contains() will tell you if the file contains a string or regex
@@ -108,8 +108,8 @@ export default function mySecondRule() {
           }
         }
 
-        // file.modified will tell you if the current file was created in this diff
-        if (file.modified) {
+        // file.modifiedOnly will tell you if the current file was created in this diff
+        if (file.modifiedOnly) {
           // file.before() returns the state of the file before the changes (if it existed)
           let before = await file.before()?.contains("@ratelimit(")
           let after = await file.contains("@ratelimit(")
@@ -336,10 +336,10 @@ file.created // true/false
 file.deleted // true/false
 
 // Has the file been modified? (This doesn't include created files)
-file.modified // true/false
+file.modifiedOnly // true/false
 
-// Has the file been edited (created or modified)?
-file.edited // true/false
+// Has the file been modified or created?
+file.modifiedOrCreated // true/false
 
 // Has the file been touched (created, modified, or deleted)?
 file.touched // true/false
@@ -366,10 +366,10 @@ files.created // [File, File, ...]
 files.deleted // [File, File, ...]
 
 // Get all of the modified (not including created) files.
-files.modified // [File, File, ...]
+files.modifiedOnly // [File, File, ...]
 
-// Get all of the edited (created or modified) files.
-files.edited // [File, File, ...]
+// Get all of the modified and created files.
+files.modifiedOrCreated // [File, File, ...]
 
 // Get all of the touched (created, modified, or deleted) files.
 files.touched // [File, File, ...]

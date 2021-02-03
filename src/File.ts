@@ -12,10 +12,7 @@ export default class File extends FileState {
 		super(
 			relativeFilePath,
 			(): Promise<string> => {
-				return execStdout("git", [
-					"show",
-					`${danger.git.head}:${relativeFilePath}`,
-				])
+				return execStdout("git", ["show", `${danger.git.head}:${relativeFilePath}`])
 			},
 		)
 	}
@@ -37,14 +34,14 @@ export default class File extends FileState {
 	/**
 	 * Has the file been modified? (This doesn't include created files)
 	 */
-	get modified(): boolean {
+	get modifiedOnly(): boolean {
 		return getGitMatchResult(this.path).modified
 	}
 
 	/**
-	 * Has the file been edited (created or modified)?
+	 * Has the file been modified or created?
 	 */
-	get edited(): boolean {
+	get modifiedOrCreated(): boolean {
 		return getGitMatchResult(this.path).edited
 	}
 

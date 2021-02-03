@@ -13,7 +13,7 @@ export default function recommendStoreV2() {
       `,
 		},
 		async run({ files, context }) {
-			for (let file of files.modified) {
+			for (let file of files.modifiedOnly) {
 				if (await file.diff().changedBy({ added: 0.1, removed: 0.3 })) {
 					if (!(await file.contains("StoreV2"))) {
 						context.warn("foundLegacyStoreWithManyChanges", { file })

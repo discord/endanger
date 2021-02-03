@@ -55,14 +55,14 @@ export default function recommendStorybookExamples(options: {
 			`,
 		},
 		async run({ files, context }) {
-			let components = files.matches(componentPattern).edited
+			let components = files.matches(componentPattern).modifiedOrCreated
 			let storybooks = files.matches(storybookPattern).all
 
 			for (let component of components) {
 				if (!hasMatchingStory(component, storybooks)) {
 					if (component.created) {
 						context.warn("foundNewComponentWithoutStory", { file: component })
-					} else if (component.modified) {
+					} else if (component.modifiedOnly) {
 						if (await isSignificantChange(component)) {
 							context.warn("foundComponentWithManyChangesWithoutStory", {
 								file: component,

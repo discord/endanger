@@ -15,7 +15,7 @@ export default function checkAPIEndpointLimits() {
 		},
 
 		async run({ files, context }) {
-			for (const file of files.edited) {
+			for (const file of files.modifiedOrCreated) {
 				for (const line of await file.diff().added()) {
 					if (await line.contains("@route")) {
 						let hasRateLimit = false

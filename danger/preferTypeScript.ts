@@ -37,10 +37,10 @@ export default function preferTypeScript() {
 				if (file.matches("*.{js,jsx}")) {
 					if (file.created) {
 						context.warn("foundNewJSFile", { file })
-					} else if (file.modified) {
+					} else if (file.modifiedOnly) {
 						if (await file.contains("// @flow")) {
 							if (!(await file.before()?.contains("// @flow"))) {
-								context.warn("foundNewFlowFile", { file, line: 1 })
+								context.warn("foundNewFlowFile", { file })
 							} else {
 								context.warn("foundChangedFlowFile", { file })
 							}

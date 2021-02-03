@@ -30,10 +30,10 @@ export default function preferModuleStructure(options: { projectDir: string }) {
 				`${options.projectDir}/{actions,stores,components,components_common,components_ios}/**/*`,
 			)
 
-			for (let legacyFile of legacyFiles.edited) {
+			for (let legacyFile of legacyFiles.modifiedOrCreated) {
 				if (legacyFile.created) {
 					context.warn("foundNewLegacyFile", { file: legacyFile })
-				} else if (legacyFile.modified) {
+				} else if (legacyFile.modifiedOnly) {
 					if (await legacyFile.diff()?.changedBy({ changed: 0.6 })) {
 						context.warn("foundLegacyFileWithManyChanges", { file: legacyFile })
 					}
@@ -42,7 +42,7 @@ export default function preferModuleStructure(options: { projectDir: string }) {
 
 			let constantFiles = files.matches(`${options.projectDir}/{Constants.tsx,ConstantsIOS.tsx}`)
 
-			for (let constantFile of constantFiles.modified) {
+			for (let constantFile of constantFiles.modifiedOnly) {
 				let diff = constantFile.diff()
 				for (let line of await diff.added()) {
 					if (line.contains(/^\+?\w*export/)) {

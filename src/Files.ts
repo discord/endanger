@@ -34,16 +34,16 @@ export default class Files {
 	/**
 	 * Get all of the modified files. (This doesn't include created files)
 	 */
-	get modified(): File[] {
+	get modifiedOnly(): File[] {
 		return unique(this._keyedPaths.modified).map((filePath) => {
 			return new File(filePath)
 		})
 	}
 
 	/**
-	 * Get all of the edited (created or modified) files.
+	 * Get all of the modified or created files.
 	 */
-	get edited(): File[] {
+	get modifiedOrCreated(): File[] {
 		return unique(this._keyedPaths.edited).map((filePath) => {
 			return new File(filePath)
 		})
