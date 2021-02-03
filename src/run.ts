@@ -49,7 +49,12 @@ async function _run(rules: Rule<Messages, RuleMatchers>[]) {
 
 		let ruleValues = await RuleFilter.buildRuleValues(ruleFiltersMap, rule.match, context)
 
-		await rule.run(ruleValues)
+		try {
+			await rule.run(ruleValues)
+		} catch (error) {
+			error.message = `${error.message} (from rule ${rule.callsites[1].getFileName()})`
+			throw error
+		}
 	}
 
 	for (let report of reports) {
