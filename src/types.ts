@@ -11,9 +11,12 @@ import type Context from "./Context"
 import type Rule from "./Rule"
 import type Line from "./Line"
 import type Commit from "./Commit"
+import type DiffLine from "./DiffLine"
+
+export type StructuredDiffChangeType = "add" | "del" | "normal"
 
 export interface StructuredDiffBaseChange {
-	type: "add" | "del" | "normal"
+	type: StructuredDiffChangeType
 	add: true | undefined
 	del: true | undefined
 	normal: true | undefined
@@ -85,7 +88,7 @@ export type ReportKind = "warn" | "fail" | "message"
 
 export interface ReportLocation {
 	file?: File
-	line?: Line
+	line?: Line | DiffLine
 }
 
 export interface Report {

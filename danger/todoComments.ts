@@ -15,13 +15,18 @@ export default function todoComments() {
 		},
 		async run({ files, context }) {
 			for (let file of files.modifiedOrCreated) {
-				let lines = await file.diff().unified()
+				let diffLines = await file.diff().unified()
 
-				for (let line of lines) {
+				for (let diffLine of diffLines) {
+					// Skip deleted lines
+					if (diffLine.removed) {
+						continue
+					}
+
 					// Regex is close enough for our purposes since this is just a
 					// warning on only the changed+nearby lines
-					if (await line.contains(/\/[\/\*].*\bTODO\b.*/)) {
-						context.warn("fixTodoComment", { file, line })
+					if (await diffLine.contains(/\/[\/\*].*\bTODO\b.*/)) {
+						context.warn("fixTodoComment", { file, line: diffLine })
 					}
 				}
 			}

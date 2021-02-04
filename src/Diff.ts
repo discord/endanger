@@ -1,12 +1,7 @@
 import type { TextDiff } from "danger"
-import Line from "./Line"
+import DiffLine from "./DiffLine"
 import type File from "./File"
-import type {
-	DiffThresholds,
-	GitDiffStats,
-	StructuredDiff,
-	UnifiedOptions,
-} from "./types"
+import type { DiffThresholds, GitDiffStats, StructuredDiff, UnifiedOptions } from "./types"
 
 function assertPercentage(value: number | undefined): value is number {
 	if (typeof value !== "number") {
@@ -40,8 +35,18 @@ async function getStructuredDiff(filePath: string): Promise<StructuredDiff> {
 	return diff
 }
 
-function cleanupDiffLines(lines: string) {
-	return lines.replace(/^[\+\- ]/gm, "")
+async function getCreatedFileDiffLines(file: File): Promise<DiffLine[]> {
+	let contents = await file.contents()
+	return contents.split("\n").map((line, index) => {
+		return new DiffLine({
+			type: "add",
+			ln: index + 1,
+			add: true,
+			del: undefined,
+			normal: undefined,
+			content: `+ ${line}`,
+		})
+	})
 }
 
 export default class Diff {
@@ -54,9 +59,9 @@ export default class Diff {
 	/**
 	 * Only the added lines
 	 */
-	async added(): Promise<Line[]> {
+	async added(): Promise<DiffLine[]> {
 		if (this._file.created) {
-			return await this._file.lines()
+			return await getCreatedFileDiffLines(this._file)
 		}
 
 		let diff = await getStructuredDiff(this._file.path)
@@ -65,11 +70,7 @@ export default class Diff {
 		for (let chunk of diff.chunks) {
 			for (let change of chunk.changes) {
 				if (change.add) {
-					lines.push(
-						new Line(change.ln, () => {
-							return cleanupDiffLines(change.content)
-						}),
-					)
+					lines.push(new DiffLine(change))
 				}
 			}
 		}
@@ -80,7 +81,7 @@ export default class Diff {
 	/**
 	 * Only the removed lines
 	 */
-	async removed(): Promise<Line[]> {
+	async removed(): Promise<DiffLine[]> {
 		if (this._file.created) {
 			return []
 		}
@@ -91,11 +92,7 @@ export default class Diff {
 		for (let chunk of diff.chunks) {
 			for (let change of chunk.changes) {
 				if (change.del) {
-					lines.push(
-						new Line(change.ln, () => {
-							return cleanupDiffLines(change.content)
-						}),
-					)
+					lines.push(new DiffLine(change))
 				}
 			}
 		}
@@ -106,9 +103,9 @@ export default class Diff {
 	/**
 	 * All of the changed lines
 	 */
-	async changed(): Promise<Line[]> {
+	async changed(): Promise<DiffLine[]> {
 		if (this._file.created) {
-			return await this._file.lines()
+			return await getCreatedFileDiffLines(this._file)
 		}
 
 		let diff = await getStructuredDiff(this._file.path)
@@ -117,11 +114,7 @@ export default class Diff {
 		for (let chunk of diff.chunks) {
 			for (let change of chunk.changes) {
 				if (change.add || change.del) {
-					lines.push(
-						new Line(change.ln, () => {
-							return cleanupDiffLines(change.content)
-						}),
-					)
+					lines.push(new DiffLine(change))
 				}
 			}
 		}
@@ -132,15 +125,13 @@ export default class Diff {
 	/**
 	 * All of the changed lines with `distance` lines of context.
 	 */
-	async unified(options: UnifiedOptions = {}): Promise<Line[]> {
+	async unified(options: UnifiedOptions = {}): Promise<DiffLine[]> {
 		if (options.distance != null) {
-			throw new Error(
-				"diff.unified(..) with a `distance` is not currently supported",
-			)
+			throw new Error("diff.unified(..) with a `distance` is not currently supported")
 		}
 
 		if (this._file.created) {
-			return await this._file.lines()
+			return await getCreatedFileDiffLines(this._file)
 		}
 
 		let diff = await getStructuredDiff(this._file.path)
@@ -148,43 +139,11 @@ export default class Diff {
 
 		for (let chunk of diff.chunks) {
 			for (let change of chunk.changes) {
-				let lineNumber = change.normal ? change.ln2 : change.ln
-				lines.push(
-					new Line(lineNumber, () => {
-						return cleanupDiffLines(change.content)
-					}),
-				)
+				lines.push(new DiffLine(change))
 			}
 		}
 
 		return lines
-
-		// let distance = options.distance ?? 3
-
-		// let allLines = await this._file.lines()
-		// let lastLineNumber = allLines[allLines.length - 1].lineNumber
-
-		// let changedLines = await this.changed()
-		// let matchingLines: Record<number, true> = {}
-
-		// for (let changedLine of changedLines) {
-		// 	let start = Math.max(changedLine.lineNumber - distance, 0)
-		// 	let end = Math.min(changedLine.lineNumber + distance, lastLineNumber)
-
-		// 	for (let lineNumber = start; lineNumber <= end; lineNumber++) {
-		// 		matchingLines[lineNumber] = true
-		// 	}
-		// }
-
-		// let unifiedLines: Line[] = []
-
-		// for (let line of allLines) {
-		// 	if (matchingLines[line.lineNumber]) {
-		// 		unifiedLines.push(line)
-		// 	}
-		// }
-
-		// return unifiedLines
 	}
 
 	/**
@@ -219,24 +178,15 @@ export default class Diff {
 	async changedBy(thresholds: DiffThresholds): Promise<boolean> {
 		let stats = await this.stats()
 
-		if (
-			assertPercentage(thresholds.changed) &&
-			stats.added / stats.after > thresholds.changed
-		) {
+		if (assertPercentage(thresholds.changed) && stats.added / stats.after > thresholds.changed) {
 			return true
 		}
 
-		if (
-			assertPercentage(thresholds.added) &&
-			stats.added / stats.after > thresholds.added
-		) {
+		if (assertPercentage(thresholds.added) && stats.added / stats.after > thresholds.added) {
 			return true
 		}
 
-		if (
-			assertPercentage(thresholds.removed) &&
-			stats.removed / stats.after > thresholds.removed
-		) {
+		if (assertPercentage(thresholds.removed) && stats.removed / stats.after > thresholds.removed) {
 			return true
 		}
 

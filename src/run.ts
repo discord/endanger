@@ -1,5 +1,8 @@
 import Rule from "./Rule"
 import Context from "./Context"
+import File from "./File"
+import Line from "./Line"
+import DiffLine from "./DiffLine"
 import type { Report, Messages, RuleMatchers } from "./types"
 import formatReport from "./utils/formatReport"
 import execStdout from "./utils/execStdout"
@@ -12,6 +15,28 @@ async function getAllFiles() {
 	let stdout = await execStdout("git", ["ls-tree", "--name-only", "-r", danger.git.head])
 	let files = stdout.split("\n")
 	return files
+}
+
+async function getLineNumber(
+	file: File,
+	line: Line | DiffLine | undefined,
+): Promise<number | undefined> {
+	if (line instanceof DiffLine) {
+		if (line.removed) {
+			return line.lineNumberAfter!
+		} else {
+			return line.lineNumberBefore!
+		}
+	} else if (line instanceof Line) {
+		return line.lineNumber
+	} else {
+		let lines = await file.diff().changed()
+		if (lines[0]) {
+			return getLineNumber(file, lines[0])
+		} else {
+			return
+		}
+	}
 }
 
 async function _run(rules: Rule<Messages, RuleMatchers>[]) {
@@ -60,8 +85,13 @@ async function _run(rules: Rule<Messages, RuleMatchers>[]) {
 	for (let report of reports) {
 		let msg = formatReport(report)
 
-		let file = report.location.file?.path
-		let line = report.location.line?.lineNumber
+		let file: string | undefined
+		let line: number | undefined
+
+		if (report.location.file != null) {
+			file = report.location.file.path
+			line = await getLineNumber(report.location.file, report.location.line)
+		}
 
 		if (report.kind === "fail") {
 			fail(msg, file, line)

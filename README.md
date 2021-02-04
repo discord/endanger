@@ -292,20 +292,44 @@ await file.lines({ before: line3 }) // [Line (1), Line (2)]
 await file.lines({ after: line1, before: line3 }) // [Line (2)]
 ```
 
+### `DiffLine`
+
+> (extends [`Bytes`](#bytes))
+
+```ts
+// Has this diff line's content been addedd?
+diffLine.added // true | false
+
+// Has this diff line's content been removed?
+diffLine.removed // true | false
+
+// Has this diff line's content been changed (added or removed)?
+diffLine.changed // true | false
+
+// Is this diff line's content unchanged?
+diffLine.unchanged // true | false
+
+// What is the line number before the change?
+diffLine.lineNumberBefore // number | null
+
+// What is the line number after the change?
+diffLine.lineNumberAfter // number | null
+```
+
 ### `Diff`
 
 ```ts
 // Only the added lines
-await diff.added() // [Line, Line, Line]
+await diff.added() // [DiffLine, DiffLine]
 
 // Only the removed lines
-await diff.removed() // [Line, Line, Line]
+await diff.removed() // [DiffLine, DiffLine]
 
 // All of the changed lines
-await diff.changed() // [Line, Line, Line, Line, Line, Line]
+await diff.changed() // [DiffLine, DiffLine, DiffLine, DiffLine]
 
 // All of the changed lines with several lines of surrounding context
-await diff.unified()
+await diff.unified() // [DiffLine, DiffLine, DiffLine, DiffLine, DiffLine, ...]
 
 // Returns a JSONDiff of the file (assuming the file is JSON)
 await diff.jsonDiff() // JSONDiff { ... }
