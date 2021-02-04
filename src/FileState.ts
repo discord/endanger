@@ -3,18 +3,46 @@ import { parse as parseYaml } from "yaml"
 import matches from "./utils/matches"
 import Bytes from "./Bytes"
 import Line from "./Line"
+import DiffLine from "./DiffLine"
 import type { Reader } from "./types"
 
 export interface LinesOptions {
-	after?: Line
-	before?: Line
+	after?: Line | DiffLine
+	before?: Line | DiffLine
+}
+
+type FileStateKind = "before" | "after"
+
+function getLineNumber(
+	line: Line | DiffLine | undefined,
+	fileState: FileStateKind,
+): number | undefined {
+	if (line instanceof DiffLine) {
+		if (fileState === "before") {
+			if (line.lineNumberBefore) {
+				return line.lineNumberBefore
+			} else {
+				throw new Error(`Added lines do not have a line number on the before state of a file`)
+			}
+		} else {
+			if (line.lineNumberAfter) {
+				return line.lineNumberAfter
+			} else {
+				throw new Error(`Removed lines do not have a line number on the after state of a file`)
+			}
+		}
+	} else if (line instanceof Line) {
+		return line.lineNumber
+	}
 }
 
 export default class FileState extends Bytes {
+	private _fileState: FileStateKind
 	private _filePath: string
 
-	constructor(relativeFilePath: string, reader: Reader) {
+	constructor(fileState: FileStateKind, relativeFilePath: string, reader: Reader) {
 		super(reader)
+		this._fileState = fileState
 		this._filePath = relativeFilePath
 	}
 
@@ -78,14 +106,11 @@ export default class FileState extends Bytes {
 	 * Read this file line by line
 	 */
 	async lines(options: LinesOptions = {}): Promise<Line[]> {
-		let afterIndex: number | undefined
-		let beforeIndex: number | undefined
+		let afterIndex = getLineNumber(options.after, this._fileState)
+		let beforeIndex = getLineNumber(options.before, this._fileState)
 
-		if (options.after) {
-			afterIndex = options.after.lineNumber
-		}
-		if (options.before) {
-			beforeIndex = options.before.lineNumber - 2
+		if (beforeIndex != null) {
+			beforeIndex = beforeIndex - 2
 		}
 
 		let contents = await this.contents()

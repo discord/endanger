@@ -10,6 +10,7 @@ function getGitMatchResult(filePath: string): GitMatchResult {
 export default class File extends FileState {
 	constructor(relativeFilePath: string) {
 		super(
+			"after",
 			relativeFilePath,
 			(): Promise<string> => {
 				return execStdout("git", ["show", `${danger.git.head}:${relativeFilePath}`])
@@ -68,7 +69,7 @@ export default class File extends FileState {
 		if (this.created) {
 			return null
 		} else {
-			return new FileState(this.path, () => {
+			return new FileState("before", this.path, () => {
 				return execStdout("git", ["show", `${danger.git.base}:${this.path}`])
 			})
 		}
