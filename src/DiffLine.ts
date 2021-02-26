@@ -1,8 +1,15 @@
+import { Line } from "."
 import Bytes from "./Bytes"
 import type { StructuredDiffChange } from "./types"
 
-function cleanupDiffLines(lines: string) {
-	return lines.replace(/^[\+\- ]/gm, "")
+function toContents(change: StructuredDiffChange) {
+	if (change.add) {
+		return change.content.replace(/^\+/, "")
+	} else if (change.del) {
+		return change.content.replace(/^-/, "")
+	} else {
+		return change.content.replace(/^ /, "")
+	}
 }
 
 export default class DiffLine extends Bytes {
@@ -10,7 +17,7 @@ export default class DiffLine extends Bytes {
 
 	constructor(change: StructuredDiffChange) {
 		super(() => {
-			return cleanupDiffLines(change.content)
+			return toContents(change)
 		})
 		this._change = change
 	}
