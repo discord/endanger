@@ -7,8 +7,20 @@ export default function matches(paths: string[], patterns: string[]): string[] {
 	//     path=some_directory/File.tsx
 	//     pattern=some_directory/**/*
 	// We ignore patterns with subdirectories for now, pending resolution of https://github.com/micromatch/picomatch/issues/89
-	const isBasename = patterns.every((pattern) => path.basename(pattern) === pattern)
+	let hasBasename = false
+	let hasNested = false
+	for (const pattern of patterns) {
+		const isBasename = path.basename(pattern) === pattern
+		hasBasename ||= isBasename
+		hasNested ||= !isBasename
+	}
+
+	if (hasBasename && hasNested) {
+		console.warn(
+			"Warning: Potentially misconfigured rule. `matches` can only handle patterns that are all a bare basename (`*.js`) or all nested (`x/**/*.js`).",
+		)
+	}
 	return micromatch(paths, patterns, {
-		basename: isBasename,
+		basename: hasBasename,
 	})
 }
