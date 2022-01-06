@@ -7,13 +7,9 @@ export default function matches(paths: string[], patterns: string[]): string[] {
 	//     path=some_directory/File.tsx
 	//     pattern=some_directory/**/*
 	// We ignore patterns with subdirectories for now, pending resolution of https://github.com/micromatch/picomatch/issues/89
-	let hasBasename = false
-	let hasNested = false
-	for (const pattern of patterns) {
-		const isBasename = path.basename(pattern) === pattern
-		hasBasename ||= isBasename
-		hasNested ||= !isBasename
-	}
+
+	let hasBasename = patterns.find((pattern) => path.basename(pattern) === pattern) != null
+	let hasNested = patterns.find((pattern) => path.basename(pattern) !== pattern) != null
 
 	if (hasBasename && hasNested) {
 		console.warn(
