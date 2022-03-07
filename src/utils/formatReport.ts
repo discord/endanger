@@ -119,5 +119,5 @@ export default function formatReport(report: Report) {
 		}),
 	)
 
-	return formatted
+	return formatted.replace(/\n$/, '')
 }
