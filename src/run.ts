@@ -23,9 +23,9 @@ async function getLineNumber(
 ): Promise<number | undefined> {
 	if (line instanceof DiffLine) {
 		if (line.removed) {
-			return line.lineNumberAfter ?? line.lineNumberBefore
+			return line.lineNumberAfter ?? line.lineNumberBefore ?? undefined
 		} else {
-			return line.lineNumberBefore ?? line.lineNumberAfter
+			return line.lineNumberBefore ?? line.lineNumberAfter ?? undefined
 		}
 	} else if (line instanceof Line) {
 		return line.lineNumber
